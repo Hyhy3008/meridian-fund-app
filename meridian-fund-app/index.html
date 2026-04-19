@@ -3,430 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meridian Fund — Systematic Macro Pipeline</title>
+    <title>Meridian Fund — Macro Pipeline</title>
     <style>
-        :root {
-            --bg-dark: #0d1117;
-            --bg-card: #161b22;
-            --border: #30363d;
-            --text-main: #c9d1d9;
-            --text-dim: #8b949e;
-            --accent-blue: #58a6ff;
-            --accent-green: #3fb950;
-            --accent-red: #f85149;
-            --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: var(--font-mono);
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-            line-height: 1.5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0d1117; color: #c9d1d9; padding: 24px; line-height: 1.6;
         }
-        header {
-            text-align: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-        }
-        header h1 { color: var(--accent-blue); margin: 0; font-size: 24px; letter-spacing: 2px; }
-        header p { color: var(--text-dim); font-size: 12px; margin-top: 5px; }
-        .container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            max-width: 1800px;
-            margin: 0 auto;
-        }
+        .header { text-align: center; margin-bottom: 40px; border-bottom: 1px solid #30363d; padding-bottom: 20px; }
+        .header h1 { color: #58a6ff; font-size: 28px; letter-spacing: 1px; }
+        .header p { color: #8b949e; font-size: 14px; margin-top: 8px; }
+        
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 1600px; margin: 0 auto; }
+        
         .card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-            position: relative;
-            display: flex;
-            flex-direction: column;
+            background-color: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 20px;
+            display: flex; flex-direction: column; height: 100%;
         }
-        .card.full-width {
-            grid-column: 1 / -1;
-            border: 1px solid var(--accent-blue);
-            background-color: rgba(88, 166, 255, 0.03);
-        }
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 10px;
-        }
-        .card-title {
-            font-size: 14px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .status-dot {
-            width: 10px; height: 10px; border-radius: 50%;
-            background-color: var(--accent-red);
-            box-shadow: 0 0 5px var(--accent-red);
-            transition: all 0.3s;
-        }
-        .status-dot.active {
-            background-color: var(--accent-green);
-            box-shadow: 0 0 8px var(--accent-green);
-        }
+        .card.full-width { grid-column: 1 / -1; border: 1px solid #58a6ff; background-color: rgba(88, 166, 255, 0.03); }
+        
+        .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #30363d; }
+        .title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        
+        .dot { width: 10px; height: 10px; border-radius: 50%; background-color: #f85149; box-shadow: 0 0 6px #f85149; transition: 0.3s; }
+        .dot.active { background-color: #3fb950; box-shadow: 0 0 8px #3fb950; }
+        
         .btn {
-            background-color: var(--border);
-            color: var(--text-main);
-            border: 1px solid var(--text-dim);
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-family: var(--font-mono);
-            font-size: 11px;
-            transition: all 0.2s;
+            background-color: #21262d; color: #c9d1d9; border: 1px solid #8b949e;
+            padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: 0.2s;
         }
-        .btn:hover { background-color: var(--text-dim); color: var(--bg-dark); }
-        .btn-primary {
-            background-color: var(--accent-blue);
-            color: var(--bg-dark);
-            border: none;
-            font-weight: bold;
-        }
+        .btn:hover { background-color: #8b949e; color: #0d1117; }
+        .btn-primary { background-color: #58a6ff; color: #0d1117; border: none; font-weight: 700; }
         .btn-primary:hover { background-color: #79c0ff; }
+        
+        .note { font-size: 12px; color: #8b949e; margin-bottom: 12px; padding: 10px; background: rgba(255,255,255,0.02); border-left: 3px solid #30363d; border-radius: 4px; }
+        .note.final { border-left-color: #d29922; background: rgba(210, 153, 34, 0.05); }
+        
         textarea {
-            width: 100%;
-            flex-grow: 1;
-            min-height: 250px;
-            background-color: var(--bg-dark);
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            font-family: var(--font-mono);
-            font-size: 11px;
-            padding: 10px;
-            resize: vertical;
-            box-sizing: border-box;
+            width: 100%; flex-grow: 1; min-height: 250px; background-color: #0d1117;
+            border: 1px solid #30363d; color: #c9d1d9;
+            font-family: 'Fira Code', 'Courier New', monospace; font-size: 12px;
+            padding: 12px; resize: vertical; border-radius: 6px;
         }
-        .full-width textarea { min-height: 300px; font-size: 11px; }
-        .instructions {
-            font-size: 10px;
-            color: var(--text-dim);
-            margin-bottom: 10px;
-            padding: 8px;
-            background: rgba(255,255,255,0.02);
-            border-radius: 4px;
-        }
-        .notification {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: var(--accent-green);
-            color: var(--bg-dark);
-            padding: 10px 20px;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 12px;
-            display: none;
-            z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        .payload-box { min-height: 200px; font-size: 11px; background-color: #0d1117; border: 1px dashed #30363d; }
+        .output-box { min-height: 400px; border: 1px solid #3fb950; }
+
+        .toast {
+            position: fixed; bottom: 30px; right: 30px; background-color: #3fb950; color: #0d1117;
+            padding: 12px 24px; border-radius: 8px; font-weight: bold; font-size: 14px;
+            display: none; z-index: 1000; box-shadow: 0 8px 16px rgba(0,0,0,0.5);
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>MERIDIAN FUND PIPELINE</h1>
-        <p>STRICT JSON-BASED CROSS-ASSET SYNTHESIS SYSTEM // ZERO HALLUCINATION PROTOCOL</p>
-    </header>
+    <div class="header">
+        <h1>MERIDIAN FUND</h1>
+        <p>CROSS-ASSET MACRO SYNTHESIS ENGINE // DEPLOYED ARCHITECTURE</p>
+    </div>
 
-    <div class="container">
-        
-        <!-- MODULE A -->
+    <div class="grid-container">
+        <!-- A -->
         <div class="card">
-            <div class="card-header">
-                <div class="card-title"><div class="status-dot" id="dot-a"></div>MODULE A: FED MACRO</div>
-                <button class="btn" onclick="copyPrompt('a')">Copy JSON A</button>
+            <div class="card-top">
+                <div class="title"><div class="dot" id="dot-a"></div>MODULE A: FED MACRO</div>
+                <button class="btn" id="btn-a" onclick="copyPrompt('a')" disabled>Loading...</button>
             </div>
-            <div class="instructions">Paste Báo cáo Vĩ mô (Markdown) trả về từ LLM sau khi chạy Prompt A.</div>
-            <textarea id="input-a" placeholder="Paste kết quả Module A vào đây..."></textarea>
+            <div class="note"><strong>Bước 1:</strong> Copy JSON A -> Chạy LLM -> Dán kết quả vào đây.</div>
+            <textarea id="input-a" placeholder="Paste kết quả Module A..."></textarea>
         </div>
 
-        <!-- MODULE B -->
+        <!-- B -->
         <div class="card">
-            <div class="card-header">
-                <div class="card-title"><div class="status-dot" id="dot-b"></div>MODULE B: RATE PROXY</div>
-                <button class="btn" onclick="copyPrompt('b')">Copy JSON B</button>
+            <div class="card-top">
+                <div class="title"><div class="dot" id="dot-b"></div>MODULE B: RATE PROXY</div>
+                <button class="btn" id="btn-b" onclick="copyPrompt('b')" disabled>Loading...</button>
             </div>
-            <div class="instructions">Paste Kết quả định giá Lãi suất CME/Dot Plot.</div>
-            <textarea id="input-b" placeholder="Paste kết quả Module B vào đây..."></textarea>
+            <div class="note"><strong>Bước 2:</strong> Dữ liệu CME / Dot Plot.</div>
+            <textarea id="input-b" placeholder="Paste kết quả Module B..."></textarea>
         </div>
 
-        <!-- MODULE C -->
+        <!-- C -->
         <div class="card">
-            <div class="card-header">
-                <div class="card-title"><div class="status-dot" id="dot-c"></div>MODULE C: MECHANICAL COT</div>
-                <button class="btn" onclick="copyPrompt('c')">Copy JSON C</button>
+            <div class="card-top">
+                <div class="title"><div class="dot" id="dot-c"></div>MODULE C: OPTIONS STRUCTURE</div>
+                <button class="btn" id="btn-c" onclick="copyPrompt('c')" disabled>Loading...</button>
             </div>
-            <div class="instructions">Paste Kết quả Ma trận OI & COT Larry Williams (Vàng/S&P).</div>
-            <textarea id="input-c" placeholder="Paste kết quả Module C vào đây..."></textarea>
+            <div class="note"><strong>Bước 3:</strong> (Tùy chọn) Output từ Python Code (GEX, Magnet, Stop Hunt).</div>
+            <textarea id="input-c" placeholder="(Nếu không có data Python, để trống. LLM sẽ xử lý thiếu dữ liệu)..."></textarea>
         </div>
 
-        <!-- MODULE D -->
+        <!-- D -->
         <div class="card">
-            <div class="card-header">
-                <div class="card-title"><div class="status-dot" id="dot-d"></div>MODULE D: SMART MONEY FLOWS</div>
-                <button class="btn" onclick="copyPrompt('d')">Copy JSON D</button>
+            <div class="card-top">
+                <div class="title"><div class="dot" id="dot-d"></div>MODULE D: SMART MONEY FLOWS</div>
+                <button class="btn" id="btn-d" onclick="copyPrompt('d')" disabled>Loading...</button>
             </div>
-            <div class="instructions">Paste Kết quả Dòng tiền thực tế (TIC, EPFR, ETF).</div>
-            <textarea id="input-d" placeholder="Paste kết quả Module D vào đây..."></textarea>
+            <div class="note"><strong>Bước 4:</strong> Dòng tiền TIC, EPFR, ETF.</div>
+            <textarea id="input-d" placeholder="Paste kết quả Module D..."></textarea>
         </div>
 
-        <!-- MODULE E: ASSEMBLY -->
+        <!-- E: ASSEMBLY & OUTPUT SPLIT -->
         <div class="card full-width">
-            <div class="card-header">
-                <div class="card-title" style="color: var(--accent-blue);">MODULE E: CIO SYNTHESIS ENGINE (PAYLOAD ASSEMBLY)</div>
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-primary" onclick="buildFinalPayload()">⚙️ ASSEMBLE JSON PAYLOAD</button>
-                    <button class="btn" onclick="copyFinalPayload()">📋 COPY FINAL JSON</button>
+            <div class="card-top">
+                <div class="title" style="color: #58a6ff;">MODULE E: CIO SYNTHESIS PIPELINE</div>
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn btn-primary" onclick="buildFinalPayload()">⚙️ 1. ASSEMBLE JSON PROMPT</button>
+                    <button class="btn" onclick="copyFinalPayload()">📋 2. COPY PROMPT CHO LLM</button>
                 </div>
             </div>
-            <div class="instructions">
-                <strong>PROTOCOL:</strong> Bấm ASSEMBLE để hệ thống đóng gói 4 dữ liệu trên vào 1 cấu trúc JSON duy nhất (Module E). LLM sẽ bị khóa web_search và BẮT BUỘC phân tích chéo dựa trên khối dữ liệu này.
+            <div class="note"><strong>HƯỚNG DẪN:</strong> Bấm 'ASSEMBLE' để hệ thống đóng gói dữ liệu. Sau đó bấm 'COPY', mang qua ChatGPT/Claude chốt hạ. <u>KHÔNG sửa ô dưới này bằng tay.</u></div>
+            
+            <!-- Phần 1: Prompt Payload -->
+            <textarea id="final-payload" readonly placeholder="1. JSON Prompt sẽ xuất hiện ở đây sau khi bấm ASSEMBLE..."></textarea>
+
+            <div style="margin-top: 30px; border-top: 1px solid #30363d; padding-top: 20px;">
+                <div class="card-top" style="padding-top:0; margin-bottom:15px; border-bottom: 1px solid #3fb950;">
+                    <div class="title" style="color: #3fb950;">KẾT QUẢ CUỐI CÙNG (BÁO CÁO & LỆNH GIAO DỊCH)</div>
+                </div>
+                <div class="note final"><strong>CÔNG DỌNG CUỐI:</strong> Sau khi LLM trả lời xong, dán toàn bộ kết quả (bao gồm cả bảng phân tích Vĩ mô, Mâu thuẫn, và KHUNG LỆNH MUA/BÁN CHI TIẾT) vào ô dưới đây để lưu trữ/đọc.</div>
+                <!-- Phần 2: Ô để dán kết quả thực tế -->
+                <textarea id="final-output" placeholder="2. Dán kết quả Báo cáo & Chiến lược Lệnh cuối cùng từ LLM vào đây..."></textarea>
             </div>
-            <textarea id="final-payload" readonly placeholder="Final JSON Payload will be generated here..."></textarea>
         </div>
 
     </div>
 
-    <div id="notification" class="notification">Copied!</div>
+    <div class="toast" id="toast"></div>
 
     <script>
-        // ==========================================
-        // PROMPT DATABASE (CHUẨN JSON STRING)
-        // ==========================================
-        
-        const prompts = {
-            // --- MODULE A: FED MACRO (CỦA BẠN) ---
-            a: `{
-  "vai_tro_agent": "Senior US Monetary Policy Strategist — Tư duy FOMC Voting Member",
-  "phien_ban": "3.2-calendar-state-machine",
-  "che_do_thuc_thi": "Báo cáo Đánh giá Chính sách Vĩ mô. KHÔNG xuất JSON. Giọng văn học thuật, phân tích xác suất. KHÔNG khuyến nghị giao dịch.",
-  "CAM_KET_TUYET_DOI": {
-    "quy_tac_1": "KHÔNG BAO GIỜ bịa hoặc ước tính số liệu nếu không có nguồn xác nhận. Thiếu dữ liệu = ghi 'KHÔNG THU THẬP ĐƯỢC'.",
-    "quy_tac_2": "KHÔNG dùng số liệu từ memory/training data. Mọi con số phải đến từ search/fetch thực hiện trong phiên này.",
-    "quy_tac_3": "KHÔNG fetch URL từ bộ nhớ. Mọi URL phải xuất phát từ kết quả search trước đó.",
-    "quy_tac_4": "Mỗi số liệu phải có 3 trường: [Giá trị] | [Nguồn URL từ search] | [Ngày cập nhật].",
-    "quy_tac_5": "Phát ngôn Fed chỉ hợp lệ nếu ngày phát biểu trong 60 ngày trước ngày chạy báo cáo."
-  },
-  "kiem_tra_ket_noi": {
-    "buoc_0a_bat_buoc": "TRƯỚC KHI BẮT ĐẦU: (1) Xác định ngày hôm nay là [Tháng/Năm hiện tại]. (2) Xác định [Tháng trước] và [2 tháng trước]. (3) Chạy search query: 'Federal Reserve federal funds rate current [Năm hiện tại]'. Nếu thất bại → DỪNG và báo lỗi kết nối."
-  },
-  "buoc_0b_release_schedule_matrix": {
-    "mo_ta": "MODULE TRẠNG THÁI DỮ LIỆU. LLM không tự biết ngày nào số nào ra. Phải xây dựng bảng ma trận này TRƯỚC khi thu thập số liệu.",
-    "hanh_dong": "Chạy search: 'US economic calendar [Tháng hiện tại] [Năm hiện tại] CPI PCE NFP release dates'. Đọc lịch và phân loại TỪNG chỉ số vào 4 trạng thái sau:",
-    "cac_trang_thai": {
-      "A_LIVE": "ĐÃ CÔNG BỔ trong tháng hiện tại/tuần trước. Hành động: Fetch số thực.",
-      "B_PENDING": "CHƯA CÔNG BỔ nhưng có ngày release rõ ràng trong tháng này. Hành động: Lấy Consensus, đánh dấu 'CHƯA CÔNG BỔ'.",
-      "C_PROXY": "CHƯA CÔNG BỔ và cách ngày release còn xa (thường là PCE, JOLTS). Hành động: TUYỆT ĐỐI KHÔNG search số thật. Dùng Proxy đã quy định.",
-      "D_UNKNOWN": "Không xác định được lịch. Hành động: Bỏ qua."
-    },
-    "quy_tac_proxy_da_xac_nhan": {
-      "PCE_to_CPI": "Nếu PCE trạng thái C -> Dùng Core CPI (trạng thái A) làm proxy. Ghi rõ: '(Proxy cho PCE dựa trên Core CPI)'.",
-      "JOLTS_to_NFP": "Nếu JOLTS trạng thái C -> Dùng NFP và Unemployment Rate (trạng thái A) làm proxy xu hướng. Ghi rõ: '(Proxy cho JOLTS dựa trên NFP)'."
-    },
-    "dinh_dang_bat_buoc": "In ra bảng Markdown: | Chỉ số Vĩ mô | Trạng thái (A/B/C/D) | Hành động / Proxy được dùng |"
-  },
-  "giao_thuc_thu_thap_data": {
-    "tuyet_doi_tuan_thu_0b": "QUAN TRỌNG: Khi thực hiện Bước 1, AI PHẢI nhìn vào bảng trạng thái ở Bước 0b. Nếu chỉ số ở trạng thái C, PHẢI áp dụng quy tắc proxy.",
-    "nguyen_tac_search_first": "Với chỉ số trạng thái A: (1) chạy search_query, (2) đọc URL từ kết quả, (3) fetch URL đó.",
-    "dinh_dang_chuan": "[Chỉ số]: [Giá trị] | Kỳ trước: [...] | Consensus: [...] | Đánh giá: [Hot/Cool/In-line] | Nguồn: [URL] | Ngày: [DD/MM/YYYY] | Trạng thái: [A/B/C]"
-  },
-  "buoc_1_thu_thap_data": {
-    "nhom_1_lam_phat": {
-      "chi_so": [
-        { "ten": "Core PCE YoY", "search_query": "BEA personal income outlays PCE price index latest [Năm hiện tại]", "search_query_fallback": "Core PCE inflation rate latest monthly BEA [Năm hiện tại]" },
-        { "ten": "CPI Headline và Core", "search_query": "BLS CPI consumer price index latest release [Tháng trước] [Năm hiện tại]", "search_query_fallback": "US CPI inflation [Tháng trước] [Năm hiện tại] BLS report" },
-        { "ten": "Breakeven Inflation 5Y và 10Y", "search_query": "TIPS breakeven inflation 5 year 10 year rate today [Năm hiện tại]" },
-        { "ten": "Michigan Inflation Expectations", "search_query": "University Michigan consumer sentiment inflation expectations latest [Năm hiện tại]" }
-      ]
-    },
-    "nhom_2_viec_lam": {
-      "chi_so": [
-        { "ten": "Non-Farm Payrolls (NFP)", "search_query": "BLS employment situation nonfarm payrolls [Tháng trước] [Năm hiện tại]" },
-        { "ten": "Tỷ lệ thất nghiệp U-3 và Sahm Rule", "search_query": "unemployment rate [Tháng trước] [Năm hiện tại] BLS Sahm Rule indicator" },
-        { "ten": "JOLTS Job Openings", "search_query": "JOLTS job openings [2 tháng trước] [Năm hiện tại] BLS latest" },
-        { "ten": "Average Hourly Earnings YoY", "search_query": "average hourly earnings YoY [Tháng trước] [Năm hiện tại] BLS" },
-        { "ten": "Atlanta Fed Wage Growth Tracker", "search_query": "Atlanta Fed Wage Growth Tracker latest [Năm hiện tại]" }
-      ]
-    },
-    "nhom_3_tang_truong": {
-      "chi_so": [
-        { "ten": "Atlanta Fed GDPNow", "search_query": "Atlanta Fed GDPNow latest estimate current quarter [Năm hiện tại]" },
-        { "ten": "ISM Manufacturing PMI", "search_query": "ISM manufacturing PMI [Tháng trước] [Năm hiện tại] prices paid new orders" },
-        { "ten": "ISM Services PMI", "search_query": "ISM services NMI PMI [Tháng trước] [Năm hiện tại] prices paid" },
-        { "ten": "Retail Sales MoM (Control Group)", "search_query": "retail sales [Tháng trước] [Năm hiện tại] Census Bureau control group" }
-      ]
-    },
-    "nhom_4_dieu_kien_tai_chinh": {
-      "chi_so": [
-        { "ten": "Fed Funds Rate", "search_query": "Federal Reserve federal funds rate target range current [Năm hiện tại]" },
-        { "ten": "10Y Treasury Yield", "search_query": "10 year treasury yield today [Năm hiện tại]" },
-        { "ten": "10Y Real Yield TIPS", "search_query": "10 year real yield TIPS today [Năm hiện tại]" },
-        { "ten": "Yield Curve Spread 10Y - 2Y", "search_query": "yield curve 10 year 2 year spread inversion today [Năm hiện tại]" },
-        { "ten": "DXY US Dollar Index", "search_query": "DXY US dollar index today [Năm hiện tại]" },
-        { "ten": "QT Balance Sheet", "search_query": "Federal Reserve balance sheet QT pace Treasury MBS [Năm hiện tại]" }
-      ]
-    }
-  },
-  "buoc_2_dual_mandate": {
-    "nhiem_vu": "Đối chiếu dữ liệu Bước 1 với mục tiêu Fed.",
-    "bang_scorecard_bat_buoc": "| Chỉ số | Giá trị | Loại dữ liệu (Live/Proxy) | Mục tiêu Fed | Khoảng cách | Xu hướng | Confidence |",
-    "ket_luan": "Xác định Pain Point chính: Lạm phát hay Việc làm?"
-  },
-  "buoc_3_phat_ngon_fed": {
-    "nhiem_vu": "Thu thập phát ngôn Fed. ƯU TIÊN: Minutes > Statement > Powell > Governors > Regional Presidents.",
-    "nguon_1_fomc_minutes": { "search_query": "FOMC minutes latest [Năm hiện tại] Federal Reserve site:federalreserve.gov" },
-    "nguon_2_fomc_statement": { "search_query": "FOMC statement latest [Năm hiện tại] federalreserve.gov monetary policy" },
-    "nguon_3_powell": { "search_query": "Jerome Powell speech remarks [Tháng hiện tại] [Năm hiện tại]" },
-    "nguon_4_governors_voting": { "search_query": "Fed Governor speech [Tháng hiện tại] [Năm hiện tại] Jefferson Waller Kugler Cook Bowman Barr Miran", "recency_gate": "Chỉ dùng nếu trong 60 ngày." },
-    "nguon_5_ny_fed_regional": { "search_query": "John Williams NY Fed speech [Tháng hiện tại] [Năm hiện tại]", "chu_y": "Kiểm tra FOMC voting members rotation [Năm hiện tại]." },
-    "nguon_7_sep_dot_plot": { "search_query": "Fed dot plot SEP latest [Năm hiện tại] summary economic projections" },
-    "phan_loai_hawkish_dovish": "Xếp loại: Hawkish / Neutral / Dovish.",
-    "phan_loai_rui_ro": "Rủi ro [Lạm phát tăng] vs [Kinh tế giảm]."
-  },
-  "buoc_4_xac_suat_du_bao": {
-    "cme_fedwatch": { "search_query": "CME FedWatch FOMC meeting probability [Tháng hiện tại] [Năm hiện tại]" },
-    "contrarian_check": "Thị trường (CME) đang định giá ĐÚNG, QUÁ DOVISH, hay QUÁ HAWKISH so với Data?",
-    "kich_ban": "Base Case, Hawkish Risk, Dovish Risk (Gắn xác suất %)."
-  },
-  "buoc_4b_self_audit": {
-    "bat_buoc_truoc_buoc_5": "Liệt kê tất cả số liệu -> Đánh dấu [VERIFIED] / [UNVERIFIED] / [PROXY]. Nếu tỷ lệ PROXY > 40% -> cảnh báo. Nếu lỗi > 50% -> DỪNG."
-  },
-  "buoc_5_verdict": {
-    "dieu_kien": "Chỉ chạy nếu Self-Audit cho phép.",
-    "dinh_dang": [
-      "1. Triết lý hiện tại: [Kiên nhẫn / Thắt chặt / Nới lỏng] — Confidence: [HIGH/MEDIUM/LOW]",
-      "2. Swing Factor: [Tên chỉ số] | Ngày công bố tiếp theo: [DD/MM/YYYY]",
-      "3. Dự đoán Fed Funds Rate: [X%-X%] tại [Tháng/Năm]. Số lần cắt giảm kỳ vọng năm nay: [N].",
-      "4. Balance Sheet (QT): [X tỷ/tháng]. Thay đổi: [Có/Không]",
-      "5. Môi trường ngầm định: Real Yield [X]% → Risk-on hay Risk-off?"
-    ]
-  },
-  "yeu_cau_dau_ra": {
-    "dinh_dang": "Markdown.",
-    "tu_cam": ["Chắc chắn sẽ", "Tuyệt đối", "Phải mua/bán", "Bùng nổ"],
-    "tu_khuyen_khich": ["Priced-in", "Asymmetric risk", "Policy lag", "Sticky core inflation", "Hard landing", "Sahm Rule", "De-anchoring"],
-    "cau_truc": ["## 0b. MA TRẬN LỊCH", "## 1. DỮ LIỆU VĨ MÔ", "## 2. DUAL MANDATE SCORECARD", "## 3. PHÁT NGÔN FED & RỦI RO", "## 4. XÁC SUẤT", "## 4b. SELF-AUDIT", "## 5. THE VERDICT"]
-  },
-  "huong_dan_cuoi": "Đóng vai FOMC voting member. Bắt đầu thẳng bước kiểm tra kết nối (0a), sau đó lập tức chạy Ma trận lịch (0b)."
-}`,
+        let PROMPTS = {};
 
-            // --- MODULE B: RATE PROXY ---
-            b: `{
-  "vai_tro_agent": "Interest Rate Pricing Strategist",
-  "phien_ban": "1.0-cme-dotplot-extractor",
-  "che_do_thuc_thi": "Báo cáo dạng Markdown cực ngắn gọn. KHÔNG xuất JSON.",
-  "dieu_kien_tien_quyet": "YÊU CẦU web_search hoạt động.",
-  "quy_trinh": [
-    {
-      "buoc": 1,
-      "nhiem_vu": "Trích xuất xác suất CME FedWatch",
-      "hanh_dong": "Tìm kiếm 'CME FedWatch tool [Tháng/Năm hiện tại]'. Trích xuất chính xác % xác suất Hold/Cut/Hike cho cuộc họp tiếp theo."
-    },
-    {
-      "buoc": 2,
-      "nhiem_vu": "Trích xuất Dot Plot FED",
-      "hanh_dong": "Tìm kiếm 'Fed dot plot SEP latest [Năm hiện tại]'. Lấy Median dot cho năm nay và năm sau."
-    }
-  ],
-  "yeu_cau_dau_ra": {
-    "dinh_dang_bat_buoc": "CHỈ Xuất 4 dòng sau (thay thế chữ trong ngoặc vuông bằng số thật):\n- Thị trường định giá FOMC tới: [Hold/Cut Xbps] ([X]% xác suất)\n- Tổng số lần điều chỉnh kỳ vọng năm nay: [X] lần\n- Median Dot Plot năm nay: [X%] | Năm sau: [X%]\n- Khoảng cách (Gap) giữa Market Pricing và Dot Plot: [Đang định giá Hawkish hơn / Dovish hơn / Đồng thuận]"
-  }
-}`,
-
-            // --- MODULE C: LARRY WILLIAMS COT ---
-            c: `{
-  "vai_tro_agent": "Market Mechanics Strategist — Larry Williams Volatility Breakout",
-  "phien_ban": "1.0-zero-zscore-cot",
-  "che_do_thuc_thi": "Báo cáo Markdown. KHÔNG xuất JSON. KHÔNG dùng ngôn ngữ mơ hồ.",
-  "dieu_kien_tien_quyet": "YÊU CẦU web_search.",
-  "quy_trinh": [
-    {
-      "buoc": 1,
-      "nhiem_vu": "Tin tức & Liên thị trường",
-      "hanh_dong": "Tìm tin 7 ngày qua (Địa chính trị, Fed). Tính Tỷ lệ Vàng/Bạc, % thay đổi tuần USDJPY và Dầu WTI."
-    },
-    {
-      "buoc": 2,
-      "nhiem_vu": "Đọc CFTC Vàng (Không tính Z-Score)",
-      "nguon": "https://www.cftc.gov/dea/futures/deacmxsf.htm",
-      "huong_dan": "Tìm dòng 'GOLD - COMMODITY EXCHANGE INC.' -> 'PHI THƯƠNG MẠI'. Tính Vị thế Ròng Dài = Cột MUA - Cột BÁN. Đánh giá: Crowded Long / Washout / Bình thường."
-    },
-    {
-      "buoc": 3,
-      "nhiem_vu": "Ma trận OI",
-      "hanh_dong": "Từ CFTC: Lấy thay đổi OI và thay đổi Vị thế ròng. Đối chiếu Ma trận:\n- Giá ↑ + OI ↑ + VR ↑ mạnh = HÚT VỊ THẾ MUA\n- Giá ↑ + OI ↓ + VR ↓ = TĂNG GIẢ TẠO (CẢNH BÁO ĐỎ)\n- Giá ↓ + OI ↑ + VR ↓ mạnh = HÚT VỊ THẾ BÁN\n- Giá ↓ + OI ↓ + VR ↓ = THANH LÝ VỊ THẾ MUA"
-    },
-    {
-      "buoc": 4,
-      "nhiem_vu": "Kết luận & Lệnh",
-      "dinh_dang": "Kết luận: [TĂNG/GIẢM/TRUNG TÍNH/TĂNG GIẢ TẠO]. Nếu có giao dịch: Setup Zone, Trigger Breakout, Stop Loss, Target 1. TÍNH R:R. Nếu R:R < 2.0 -> Hủy lệnh."
-    }
-  ],
-  "tu_cam": ["mạnh mẽ", "tiềm năng", "chờ mua tại"]
-}`,
-
-            // --- MODULE D: SMART MONEY FLOWS ---
-            d: `{
-  "vai_tro_agent": "Prime Brokerage Flow Strategist — Market Microstructure",
-  "phien_ban": "1.0-follow-the-smart-money",
-  "che_do_thuc_thi": "Báo cáo Dòng tiền Thực tế. KHÔNG phân tích vĩ mô. CHỈ BÁO CÁO SỐ TIỀN CHUYỂN DỊCH.",
-  "dieu_kien_tien_quyet": "YÊU CẦU web_search.",
-  "quy_trinh": [
-    {
-      "buoc": 1,
-      "nhiem_vu": "Sovereign Flow (Trái phiếu)",
-      "hanh_dong": "Tìm 'Treasury auction results 10Y 30Y [Tháng/Năm]'. Lọc: Bid-to-Cover, Indirect Bidders (Nước ngoài), Primary Dealers. Tìm 'TIC data foreign holdings latest'."
-    },
-    {
-      "buoc": 2,
-      "nhiem_vu": "Institutional Flows (EPFR)",
-      "hanh_dong": "Tìm 'EPFR global fund flows week [Năm]'. Lọc: US Equities vs Non-US, Bond Funds, High Yield vs IG Bonds."
-    },
-    {
-      "buoc": 3,
-      "nhiem_vu": "Leveraged & Retail Flows",
-      "hanh_dong": "Tìm CFTC S&P 500 E-mini managed money net position. Tìm 'ETF fund flows week [Năm]' (Lọc: SPY, QQQ, GLD, HYG/JNK)."
-    },
-    {
-      "buoc": 4,
-      "nhiem_vu": "Ma trận Mâu thuẫn",
-      "hanh_dong": "Đối chiếu Foreign flow vs ETF flow vs COT."
-    },
-    {
-      "buoc": 5,
-      "nhiem_vu": "THE FLOW VERDICT",
-      "dinh_dang_bat_buoc": "Chỉ 3 dòng: ORIGIN (Tiền từ đâu) | DESTINATION (Đổ vào đâu) | CONFLICT (Mâu thuẫn phe lớn vs phe nhỏ)."
-    }
-  ]
-}`
-        };
-
-        // ==========================================
-        // CORE LOGIC
-        // ==========================================
+        async function loadPrompts() {
+            try {
+                const [a, b, c, d] = await Promise.all([
+                    fetch('./prompts/module-a.json').then(r => r.json()),
+                    fetch('./prompts/module-b.json').then(r => r.json()),
+                    fetch('./prompts/module-c.json').then(r => r.json()),
+                    fetch('./prompts/module-d.json').then(r => r.json())
+                ]);
+                PROMPTS = { a, b, c, d };
+                document.getElementById('btn-a').innerText = "Copy JSON A"; document.getElementById('btn-a').disabled = false;
+                document.getElementById('btn-b').innerText = "Copy JSON B"; document.getElementById('btn-b').disabled = false;
+                document.getElementById('btn-c').innerText = "Copy JSON C"; document.getElementById('btn-c').disabled = false;
+                document.getElementById('btn-d').innerText = "Copy JSON D"; document.getElementById('btn-d').disabled = false;
+            } catch (error) {
+                console.error("Lỗi tải JSON:", error);
+                alert("LỖI: Không thể tải các file JSON từ thư mục 'prompts/'. Vui lòng chạy trên Local Server (Vercel / VS Code Live Server), KHÔNG double-click file HTML.");
+            }
+        }
 
         function copyPrompt(module) {
-            const text = prompts[module];
-            navigator.clipboard.writeText(text).then(() => {
-                showNotification(`Đã copy JSON chuẩn Module ${module.toUpperCase()}!`);
-            }).catch(err => {
-                console.error('Failed to copy: ', err);
-                alert("Lỗi copy, hãy thử lại hoặc copy thủ công từ console.");
-            });
+            const jsonString = JSON.stringify(PROMPTS[module], null, 2);
+            navigator.clipboard.writeText(jsonString).then(() => showToast(`Đã copy JSON Module ${module.toUpperCase()}!`));
         }
 
         function buildFinalPayload() {
@@ -435,97 +164,105 @@
             const c = document.getElementById('input-c').value;
             const d = document.getElementById('input-d').value;
 
-            if (!a || !b || !c || !d) {
-                alert("LỖI HỆ THỐNG PIPELINE\n\nBạn chưa dán đủ dữ liệu từ 4 Module (A, B, C, D).\nCross-Validation yêu cầu ĐỦ dữ liệu.");
-                return;
-            }
+            // CHO PHÉP Ô TRỐNG - HỆ THỐNG SẼ TỰ ĐỐNH DỊNH XỬ LÝ
+            const is_a_empty = !a || a.trim().length < 50;
+            const is_c_empty = !c || c.trim().length < 50;
 
-            // Cấu trúc JSON chuẩn cho Module E
-            const eJsonStructure = {
+            const finalObject = {
                 "vai_tro_agent": "Chief Investment Officer (CIO) — Cross-Asset Synthesis Engine",
-                "phien_ban": "1.0-strict-cross-validation",
+                "phien_ban": "2.0-ultimate-trading-integration",
                 "che_do_thuc_thi": "Báo cáo Chỉ đạo Đầu tư. KHÔNG sử dụng web_search. KHÔNG xuất JSON.",
                 "dieu_kien_tien_quyet": {
                     "bat_buoc": "PHẢI phân tích DỰA TRÊN KHỐI DỮ LIỆU CUNG CẤP DƯỚI ĐÂY. TUYỆT ĐỐI CẤM dùng kiến thức bên ngoài.",
-                    "cam_ky": "Mọi lập luận PHẢI trích dẫn trực tiếp bằng văn bản hoặc con số từ các Module dưới đây."
+                    "xu_ly_thieu_du_lieu": {
+                        "quy_tac": "Nếu một Module bị bỏ trống (không có dữ liệu), bạn PHẢI tự động gán trạng thái 'KHÔNG CÓ DỮ LIỆU' cho các chỉ số liên quan ở Bước 1 & 3.",
+                        "module_a_thieu": "Nếu Module A trống -> Toàn bộ phân tích vĩ mô là mù. Bước 3 (Phân bổ vốn) phải là NEUTRAL. Bước 5 (Lệnh) BẮT BUỘC là 'KHÔNG GIAO DỊCH'.",
+                        "module_c_thieu": "Nếu Module C trống -> Không có dữ liệu cấu trúc Options. Ở Bước 5 (Lệnh), bạn PHẢI tự động tìm Vùng hỗ trợ/kháng cự KỸ THUẬT CƠ BẢN dựa trên giá đóng cửa tuần này (lấy từ Module A hoặc D). TUYỆT ĐỐI KHÔNG đoán đỉnh đáy."
+                    }
                 },
                 "du_lieu_he_thong_dau_vao": {
-                    "module_a_vi_mo": a,
-                    "module_b_rate_proxy": b,
-                    "module_c_cot_mechanics": c,
-                    "module_d_smart_money_flows": d
+                    "module_a_vi_mo": a || "KHÔNG CÓ DỮ LIỆU",
+                    "module_b_rate_proxy": b || "KHÔNG CÓ DỮ LIỆU",
+                    "module_c_cot_mechanics": c || "KHÔNG CÓ DỮ LIỆU",
+                    "module_d_smart_money_flows": d || "KHÔNG CÓ DỮ LIỆU"
                 },
                 "quy_trinh_phan_tich_bat_buoc": [
-                    {
-                        "buoc": 1,
-                        "nhiem_vu": "MA TRẬN GIAO CẮT (Intersection Matrix)",
-                        "hanh_dong": "Đối chiếu Triết lý Fed (A) với Dòng tiền thực tế (D). Đối chiếu Định giá lãi suất (B) với Cơ học COT (C). Có mâu thuẫn không?"
+                    { 
+                        "buoc": 1, 
+                        "nhiem_vu": "MA TRẬN GIAO CẮT (Intersection Matrix)", 
+                        "hanh_dong": "Đối chiếu Triết lý Fed (A) với Dòng tiền (D). Đối chiếu Định giá lãi suất (B) với Cơ học COT (C). Ghi rõ nếu mâu thuẫn do thiếu dữ liệu (Dữ liệu mù)." 
                     },
-                    {
-                        "buoc": 2,
-                        "nhiem_vu": "PHÁT HIỆN BẪY THỊ TRƯỜNG (Trap Detection)",
-                        "hanh_dong": "Tìm 'Long Trap' (Vĩ mô/COT xấu NHƯNG Retail mua ròng SPY/QQQ). Tìm 'Short Trap' (Vĩ mô xấu NHƯNG Smart money ngừng bán/buyback)."
+                    { 
+                        "buoc": 2, 
+                        "nhiem_vu": "PHÁT HIỆN BẪY THỊ TRƯỜNG (Trap Detection)", 
+                        "hanh_dong": "Tìm 'Long Trap' hoặc 'Short Trap'. Nếu thiếu Module C hoặc D -> Ghi rõ 'Cảnh báo: Không đủ dữ liệu cấu trúc/dòng tiền để xác nhận bẫy'." 
                     },
-                    {
-                        "buoc": 3,
-                        "nhiem_vu": "CHỈ THỊ PHÂN BỔ VỐN (Asset Allocation Directive)",
-                        "dinh_dang": "Bảng Markdown: | Tài sản | Hướng (Long/Short/Neutral) | Độ tin cậy (High/Med/Low) | Lý do (trích dẫn dữ liệu) |. Áp dụng cho: DXY, US 10Y, S&P 500, Vàng."
+                    { 
+                        "buoc": 3, 
+                        "nhiem_vu": "CHỈ THỊ PHÂN BỔ VỐN (Asset Allocation Directive)", 
+                        "dinh_dang": "Bảng Markdown: | Tài sản | Hướng (Long/Short/Neutral) | Độ tin cậy (High/Med/Low) | Lý do |. Áp dụng cho: DXY, US 10Y, S&P 500, Vàng." 
                     },
                     {
                         "buoc": 4,
-                        "nhiem_vu": "CỔNG KỸ THUẬT (The Larry Williams Gate)",
-                        "quy_tac": "CỜ ĐỎ TUYỆT ĐỐI hủy tín hiệu MUA Vàng nếu: Flow (D) báo rút tiền HOẶC Vi mô (A) báo Real Yield > 1.8%. CHỈ MỞ CỔNG kỹ thuật (C) nếu cả 3 module A, C, D đồng thuận."
+                        "nhiem_vu": "CỔNG KỸ THUẬT (Larry Williams Gate)",
+                        "quy_tac": "CỜ ĐỎ hủy MUA Vàng nếu Flow (D) rút tiền HOẶC Vi mô (A) Real Yield > 1.8%. CHỈ MỞ CỔNG kỹ thuật (C) nếu A, C, D đồng thuận."
+                    },
+                    {
+                        "buoc": 5,
+                        "nhiem_vu": "CHIẾN LƯỢC GIAO DỊCH CUỐI CÙNG (TRỰC TIẾP XUẤT LỆNH)",
+                        "mo_ta": "Dựa trên phân tích ở 4 bước trên, đưa ra lệnh thực tế tuân thủ nguyên tắc Volatility Breakout và Quản trị rủi ro tuyệt đối.",
+                        "dinh_dang_bat_buoc": [
+                            "Nếu Bước 2 phát hiện Bẫy HOẶC Bước 4 kích hoạt Cờ Đỏ -> KẾT LUẬN BẮT BUỘC DÒNG CHỮ: 'KHÔNG GIAO DỊCH — Lý do: [Trích dẫn cụ thể]'. DỪNG xuất khung lệnh.",
+                            "Nếu được phép giao dịch, BẮT BUỘC xuất khung lệnh theo FORMAT SAU:",
+                            "1. Hướng: [MUA/BÁN] — Phải khớp hoàn toàn với Hướng ở Bước 3.",
+                            "2. Setup Zone: [Vùng giá cụ thể]. LƯU Ý: KHÔNG PHẢI là điểm vào lệnh. (Nếu có Module C: Lấy vùng Magnet/Wall. Nếu không có Module C: Dựa vào vùng Hỗ trợ/Kháng cự tuần này từ giá đóng cửa).",
+                            "3. Kích hoạt (Trigger): Chỉ vào lệnh khi giá [phá vỡ lên trên / phá vỡ xuống dưới] [Mức giá cụ thể] của Setup Zone.",
+                            "4. Cắt lỗ (Stop Loss): [Giá] — Cơ sở: Đặt BÊN TRONG khu vực Setup Zone.",
+                            "5. Mục tiêu 1: [Giá] | Mục tiêu 2: [Giá]",
+                            "6. Dừng thời gian (Time Stop): Nếu sau 3-5 ngày giá không di chuyển khỏi khu vực vào lệnh -> Đóng lệnh thủ công.",
+                            "7. Tỷ lệ Rủi ro/Lợi nhuận: PHẢI TỰ TÍNH. Công thức: R:R = (Mục tiêu_1 − Kích_hoạt) ÷ |Kích_hoạt − Cắt_lỗ|.",
+                            "NGƯỜNG TOI THẤP: Tỷ lệ R:R < 2.0:1 → TUYỆT ĐỐI HỦY LỆNH. Ghi rõ: 'Thiết lập không đủ R:R ([số tính được]:1 < 2.0:1) — KHÔNG VÀO LỆNH'."
+                        ]
                     }
                 ],
-                "yeu_cau_dau_ra": {
+                "yeu_cau_dau_ra": { 
                     "cau_truc": [
                         "## 1. MA TRẬN GIAO CẮT",
                         "## 2. CẢNH BÁO BẪY THỊ TRƯỜNG",
                         "## 3. CHỈ THỊ PHÂN BỔ VỐN",
-                        "## 4. CỔNG KỸ THUẬT (GATE STATUS)"
-                    ],
-                    "tu_cam": ["Tôi nghĩ", "Có thể là", "Dự kiến sẽ"]
+                        "## 4. CỔNG KỸ THUẬT",
+                        "## 5. CHIẾN LƯỢC GIAO DỊCH (KHUNG LỆNH)"
+                    ], 
+                    "tu_cam": ["Tôi nghĩ", "Có thể là", "Dự kiến sẽ"] 
                 }
             };
 
-            // Chuyển đổi đối tượng JS thành chuỗi JSON đẹp
-            const finalJsonString = JSON.stringify(eJsonStructure, null, 2);
-            
-            document.getElementById('final-payload').value = finalJsonString;
-            showNotification("Đã lắp ráp Payload JSON hoàn chỉnh!");
+            document.getElementById('final-payload').value = JSON.stringify(finalObject, null, 2);
+            showToast("Đã lắp ráp Payload kèm yêu cầu xuất Khung Lệnh!");
         }
 
         function copyFinalPayload() {
             const text = document.getElementById('final-payload').value;
-            if (!text) {
-                alert("Chưa có Payload. Bấm 'ASSEMBLE' trước.");
-                return;
-            }
-            navigator.clipboard.writeText(text).then(() => {
-                showNotification("Đã copy FINAL JSON! Paste vào LLM để nhận lệnh CIO.");
-            });
+            if (!text) return alert("Chưa có Payload. Bấm ASSEMBLE trước.");
+            navigator.clipboard.writeText(text).then(() => showToast("Đã copy FINAL JSON!"));
         }
 
-        // UI Interaction: Đổi màu đèn hiệu
-        document.querySelectorAll('textarea').forEach((textarea, index) => {
-            if (index === 4) return; 
-            const dotId = ['dot-a', 'dot-b', 'dot-c', 'dot-d'][index];
-            textarea.addEventListener('input', function() {
-                const dot = document.getElementById(dotId);
-                if (this.value.trim().length > 100) {
-                    dot.classList.add('active');
-                } else {
-                    dot.classList.remove('active');
-                }
+        // CẬP NHẬT ĐÈN LED KHI NHẬP DỮ LIỆU
+        document.querySelectorAll('textarea').forEach((el, i) => {
+            if (i >= 4) return; // Bỏ qua 2 ô ở Module E
+            const dotId = `dot-${['a','b','c','d'][i]}`;
+            el.addEventListener('input', function() {
+                document.getElementById(dotId).classList.toggle('active', this.value.trim().length > 100);
             });
         });
 
-        function showNotification(message) {
-            const notif = document.getElementById('notification');
-            notif.innerText = message;
-            notif.style.display = 'block';
-            setTimeout(() => { notif.style.display = 'none'; }, 3000);
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg; t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
         }
+
+        window.onload = loadPrompts;
     </script>
 </body>
 </html>
